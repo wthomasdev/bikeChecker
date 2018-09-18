@@ -11,16 +11,22 @@ import (
 	gomail "gopkg.in/gomail.v2"
 )
 
-func main() {
-	pollInterval := 15
+const timeBetweenChecks = 5
 
-	timerCh := time.Tick(time.Duration(pollInterval) * time.Second)
+func main() {
+	email := os.Getenv("SCRAPER_EMAIL_ADDRESS")
+	password := os.Getenv("SCRAPER_PASSWORD")
+	destination := os.Getenv("DESTINATION_ADDRESS")
+	if email == "" || password == "" || destination == "" {
+		log.Fatal("Environment variables not set.")
+	}
+	timerCh := time.Tick(time.Duration(timeBetweenChecks) * time.Second)
 
 	for range timerCh {
 		bikeInStock := checkStockOfBike()
 		fmt.Println(bikeInStock)
 		if bikeInStock {
-			sendEmail()
+			sendEmail(email, password, destination)
 		}
 	}
 }
@@ -46,13 +52,7 @@ func checkStockOfBike() bool {
 	return bikeInStock
 }
 
-func sendEmail() {
-	email := os.Getenv("SCRAPER_EMAIL_ADDRESS")
-	password := os.Getenv("SCRAPER_PASSWORD")
-	destination := os.Getenv("DESTINATION_ADDRESS")
-	if email == "" || password == "" || destination == "" {
-		log.Fatal("please set env variables")
-	}
+func sendEmail(email string, password string, destination string) {
 	m := gomail.NewMessage()
 	m.SetHeader("From", email)
 	m.SetHeader("To", destination)
