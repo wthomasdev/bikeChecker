@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -11,16 +12,17 @@ import (
 	gomail "gopkg.in/gomail.v2"
 )
 
-const timeBetweenChecks = 5
-
 func main() {
+	timeBetweenChecks := flag.Int("checkTime", 5, "a number")
+	flag.Parse()
+	fmt.Println("timeBetweenChecks", *timeBetweenChecks)
 	email := os.Getenv("SCRAPER_EMAIL_ADDRESS")
 	password := os.Getenv("SCRAPER_PASSWORD")
 	destination := os.Getenv("DESTINATION_ADDRESS")
 	if email == "" || password == "" || destination == "" {
 		log.Fatal("Environment variables not set.")
 	}
-	timerCh := time.Tick(time.Duration(timeBetweenChecks) * time.Second)
+	timerCh := time.Tick(time.Duration(*timeBetweenChecks) * time.Second)
 
 	for range timerCh {
 		bikeInStock := checkStockOfBike()
